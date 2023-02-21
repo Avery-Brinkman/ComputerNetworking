@@ -8,12 +8,13 @@ import threading
 from typing import Tuple
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
-PORT = 6789  # Port to listen on (non-privileged ports are > 1023)
+PORT = 6789
+CLRF = "\r\n"
 
 
 def processRequest(requestData: str) -> str:
   # Split each line apart
-  requestData_lines = requestData.split('\r\n')
+  requestData_lines = requestData.split(CLRF)
 
   # Print out the request
   print()
@@ -32,15 +33,33 @@ def processRequest(requestData: str) -> str:
   return fileName
 
 
-def processResponse(fileName: str) -> Tuple[int, str, str]:
-  if os.path.isfile(fileName):
+def processResponse(fileName: str) -> bytes:
+  statusLine = "HTTP/1.1 "
+  contentType = "Content-Type: "
+
+  validFile = os.path.isfile(fileName)
+  if validFile:
     with open(fileName, "rb") as file:
-      print(file.name)
-      print(mimetypes.guess_type(file.name)[0])
-      #return (200, )
+      statusLine += "200 OK" + CLRF
+      contentType += mimetypes.guess_type(file.name)[0] + CLRF
+      body = file.read()
   else:
+    statusLine += "404 Not Found" + CLRF
+    contentType += "text/html; charset=UTF-8" + CLRF
     body = "<HTML><HEAD><TITLE>Not Found</TITLE></HEAD><BODY>Not Found</BODY></HTML>"
-    return (404, "text/html; charset=UTF-8", body)
+
+  responseHeaders = statusLine + contentType + CLRF
+  
+  print()
+  print("============RESPONSE============")
+  print(responseHeaders)
+  if not validFile:
+    print(body)
+    body = bytes(body, encoding="utf-8")
+  print("================================")
+  print()
+
+  return bytes(responseHeaders, encoding="utf-8") + body
 
 
 def handleHTTP(connection: socket.socket):
@@ -50,7 +69,9 @@ def handleHTTP(connection: socket.socket):
     requestData_text = connection.recv(1024).decode('utf-8')
     
     requestedFile = processRequest(requestData_text)
-    processResponse(requestedFile)
+    httpResponse = processResponse(requestedFile)
+
+    connection.send(httpResponse)
 
 
 # Create an internet socket (AF_INET) using TCP (SOCK_STREAM)
