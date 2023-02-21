@@ -15,10 +15,19 @@ def processHTTP(connection: socket.socket):
     # Split each line apart
     requestData_lines = requestData_text.split('\r\n')
 
+    # Get the request line and split it up
+    requestLine = requestData_lines[0].split(" ")
+    # Get the file name
+    fileName = requestLine[1]
+
+    # Print out the request
     print()
+    print("============REQUEST============")
     for line in requestData_lines:
       if line == '': break
       print(line)
+    print("===============================")
+    print()
 
 # Create an internet socket (AF_INET) using TCP (SOCK_STREAM)
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
