@@ -5,13 +5,13 @@ import mimetypes
 import os
 import socket
 import threading
-from typing import Tuple
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 6789
 CLRF = "\r\n"
 
 
+# Takes HTML request text and returns the requested file name
 def processRequest(requestData: str) -> str:
   # Split each line apart
   requestData_lines = requestData.split(CLRF)
@@ -33,15 +33,20 @@ def processRequest(requestData: str) -> str:
   return fileName
 
 
+# Takes a file name and creates a relevant HTTP response (returned as bytes)
 def processResponse(fileName: str) -> bytes:
   statusLine = "HTTP/1.1 "
   contentType = "Content-Type: "
 
+  # Check that file exists
   validFile = os.path.isfile(fileName)
+  # Open it if it does
   if validFile:
     with open(fileName, "rb") as file:
       statusLine += "200 OK" + CLRF
+      # Set the content type
       contentType += mimetypes.guess_type(file.name)[0] + CLRF
+      # Get bytes from file
       body = file.read()
   else:
     statusLine += "404 Not Found" + CLRF
@@ -50,11 +55,14 @@ def processResponse(fileName: str) -> bytes:
 
   responseHeaders = statusLine + contentType + CLRF
   
+  # Print response to console
   print()
   print("============RESPONSE============")
   print(responseHeaders)
+  # Show body if no file found
   if not validFile:
     print(body)
+    # Convert the raw HTML strign to bytes to send
     body = bytes(body, encoding="utf-8")
   print("================================")
   print()
@@ -68,11 +76,15 @@ def handleHTTP(connection: socket.socket):
     # Get 1024 bytes of data and decode as utf-8
     requestData_text = connection.recv(1024).decode('utf-8')
     
+    # Skip if the TCP connection doesn't actually contain an HTTP request
     if requestData_text == "": return
 
+    # Get the file name from the HTTP request
     requestedFile = processRequest(requestData_text)
+    # Form the response bytes
     httpResponse = processResponse(requestedFile)
 
+    # Send the response bytes
     connection.send(httpResponse)
 
 
