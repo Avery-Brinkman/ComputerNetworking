@@ -68,6 +68,8 @@ def handleHTTP(connection: socket.socket):
     # Get 1024 bytes of data and decode as utf-8
     requestData_text = connection.recv(1024).decode('utf-8')
     
+    if requestData_text == "": return
+
     requestedFile = processRequest(requestData_text)
     httpResponse = processResponse(requestedFile)
 
