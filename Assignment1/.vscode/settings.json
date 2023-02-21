@@ -1,0 +1,5 @@
+{
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false,
+  "python.formatting.autopep8Args": ["--ignore E121"]
+}
