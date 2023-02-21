@@ -7,7 +7,7 @@ import threading
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 6789  # Port to listen on (non-privileged ports are > 1023)
 
-def processHTTP(connection: socket.socket):
+def handleHTTP(connection: socket.socket):
   # Context manager to close socket when done
   with connection:
     # Get 1024 bytes of data and decode as utf-8
@@ -42,6 +42,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     connection, addr = sock.accept()
 
     # Create a new thread to handle the connection
-    httpThread = threading.Thread(target=processHTTP, args=(connection,))
+    httpThread = threading.Thread(target=handleHTTP, args=(connection,))
     # Start the new thread and continue execution to handle the next connection
     httpThread.start()
