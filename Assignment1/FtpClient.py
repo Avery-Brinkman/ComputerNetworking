@@ -33,7 +33,7 @@ class FtpClient:
     self.controlSock.close()
 
   # Sends a command and checks the response
-  def sendCommand(self, command: str, expectedResponse: int):
+  def sendCommand(self, command: str, expectedResponse: int) -> bytes:
     # Converts the string to bytes
     fullCommand = bytes(command, "utf-8") + CLRF
     # Sends command
@@ -46,7 +46,7 @@ class FtpClient:
     return serverResponse
 
   # Returns the data port when given a PASV response
-  def getDataPort(self, response: str):
+  def getDataPort(self, response: str) -> int:
     # Get the IP and Port tuple
     addrPort = response[response.find("(") + 1:response.rfind(")")].split(",")
     portVals = addrPort[-2:]

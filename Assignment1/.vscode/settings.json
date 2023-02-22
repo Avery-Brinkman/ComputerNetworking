@@ -1,5 +1,6 @@
 {
   "editor.tabSize": 2,
   "editor.detectIndentation": false,
-  "python.formatting.autopep8Args": ["--ignore E121"]
+  "python.formatting.autopep8Args": ["--ignore E121"],
+  "python.analysis.typeCheckingMode": "basic"
 }

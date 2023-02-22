@@ -42,8 +42,11 @@ def processRequest(requestData: str) -> str:
 
 # Takes a file name and creates a relevant HTTP response (returned as bytes)
 def processResponse(fileName: str) -> bytes:
+  notFoundBody = "<HTML><HEAD><TITLE>Not Found</TITLE></HEAD><BODY>Not Found</BODY></HTML>"
+
   statusLine = "HTTP/1.1 "
   contentType = "Content-Type: "
+  body = b""
 
   # Check that file exists
   validFile = os.path.isfile(fileName)
@@ -67,13 +70,16 @@ def processResponse(fileName: str) -> bytes:
     with open(fileName, "rb") as file:
       statusLine += "200 OK" + CLRF
       # Set the content type
-      contentType += mimetypes.guess_type(file.name)[0] + CLRF
+      type = mimetypes.guess_type(file.name)[0]
+      if type:
+        contentType += type + CLRF
+      else:
+        contentType += "application/octet-stream" + CLRF
       # Get bytes from file
       body = file.read()
   else:
     statusLine += "404 Not Found" + CLRF
     contentType += "text/html; charset=UTF-8" + CLRF
-    body = "<HTML><HEAD><TITLE>Not Found</TITLE></HEAD><BODY>Not Found</BODY></HTML>"
 
   responseHeaders = statusLine + contentType + CLRF
   
@@ -83,9 +89,9 @@ def processResponse(fileName: str) -> bytes:
   print(responseHeaders)
   # Show body if no file found
   if not validFile:
-    print(body)
+    print(notFoundBody)
     # Convert the raw HTML strign to bytes to send
-    body = bytes(body, encoding="utf-8")
+    body = bytes(notFoundBody, encoding="utf-8")
   print("================================")
   print()
 
