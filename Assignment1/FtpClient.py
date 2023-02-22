@@ -59,15 +59,27 @@ class FtpClient:
     # Get the data port to use
     dataPort = self.getDataPort(response)
 
+    # Create a new socket for the file data
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as dataSocket:
       dataSocket.connect((self.ftpAddr, dataPort))
+
+      # Get the file, and use response to find file size
       responseLine = self.sendCommand("RETR " + fileName, 150).decode("utf-8")
-      self.controlSock.recv(1024)
+      # Wait for transfer complete response
+      assert int(self.controlSock.recv(1024)[:3]) == 226
+
+      # First response somtimes gets both lines, so find eol
       endOfFirstLine = responseLine.find("bytes).\r\n")
+      # Find last "("
       startOfBytes = responseLine.rfind("(", 0, endOfFirstLine) + 1
+      # Convert num of bytes string to int
       fileSize = int(responseLine[startOfBytes:endOfFirstLine])
+      # Get that number of bytes
       fileBytes = dataSocket.recv(fileSize)
+
+      # Open a writeable bytes file with same name locally (create if doesn't exist)
       with open(fileName[1:], 'w+b') as localFile:
+        # Write to file
         localFile.write(fileBytes)
 
 
