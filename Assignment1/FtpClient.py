@@ -19,7 +19,9 @@ class FtpClient:
     self.controlSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     self.controlSock.connect((self.ftpAddr, self.ftpPort))
     # Ensures that connection is successfully established
-    assert int(self.controlSock.recv(1024)[:3]) == 220
+    response = self.controlSock.recv(1024)
+    if int(response[:3]) != 220:
+      raise Exception("Expected code 220, got " + response.decode("utf-8"))
 
     # Send username and password, and ensures that they are accepted
     self.sendCommand("USER " + username, 331)
@@ -38,7 +40,8 @@ class FtpClient:
     self.controlSock.send(fullCommand)
     # Reads response and checks that it is what's expected 
     serverResponse = self.controlSock.recv(1024)
-    assert int(serverResponse[:3]) == expectedResponse
+    if int(serverResponse[:3]) != expectedResponse:
+      raise Exception("Expected code " + str(expectedResponse) + ", got " + serverResponse.decode("utf-8"))
     # Return response so information may be used
     return serverResponse
 
@@ -66,7 +69,9 @@ class FtpClient:
       # Get the file, and use response to find file size
       responseLine = self.sendCommand("RETR " + fileName, 150).decode("utf-8")
       # Wait for transfer complete response
-      assert int(self.controlSock.recv(1024)[:3]) == 226
+      transferResponse = self.controlSock.recv(1024)
+      if int(transferResponse[:3]) != 226:
+        raise Exception("Expected code 226, got " + transferResponse.decode("utf-8"))
 
       # First response somtimes gets both lines, so find eol
       endOfFirstLine = responseLine.find("bytes).\r\n")
