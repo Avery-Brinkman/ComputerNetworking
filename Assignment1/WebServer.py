@@ -5,6 +5,7 @@ import mimetypes
 import os
 import socket
 import threading
+from FtpClient import FtpClient
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 6789
@@ -40,6 +41,13 @@ def processResponse(fileName: str) -> bytes:
 
   # Check that file exists
   validFile = os.path.isfile(fileName)
+  if not validFile:
+    ftpClient = FtpClient()
+    ftpClient.connect("abrinkman", "admin123")
+    ftpClient.getFile(fileName)
+    ftpClient.disconnect()
+    validFile = os.path.isfile(fileName)
+
   # Open it if it does
   if validFile:
     with open(fileName, "rb") as file:
