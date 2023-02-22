@@ -14,7 +14,7 @@ USERNAME = "abrinkman"
 PASSWORD = "admin123"
 
 # localhost and default port constants
-HOST = "127.0.0.1" 
+HOST = "127.0.0.1"
 PORT = 6789
 
 
@@ -28,7 +28,8 @@ class HttpServer:
     print()
     print("============REQUEST============")
     for line in requestData_lines:
-      if line == '': break
+      if line == '':
+        break
       print(line)
     print("===============================")
     print()
@@ -82,7 +83,7 @@ class HttpServer:
       contentType += "text/html; charset=UTF-8" + CLRF
 
     responseHeaders = statusLine + contentType + CLRF
-    
+
     # Print response to console
     print()
     print("============RESPONSE============")
@@ -97,15 +98,15 @@ class HttpServer:
 
     return bytes(responseHeaders, encoding="utf-8") + body
 
-
   def handleHTTP(self, connection: socket.socket):
     # Context manager to close socket when done
     with connection:
       # Get 1024 bytes of data and decode as utf-8
       requestData_text = connection.recv(1024).decode('utf-8')
-      
+
       # Skip if the TCP connection doesn't actually contain an HTTP request
-      if requestData_text == "": return
+      if requestData_text == "":
+        return
 
       # Get the file name from the HTTP request
       requestedFile = self.processRequest(requestData_text)
@@ -122,7 +123,7 @@ class HttpServer:
       sock.bind((HOST, PORT))
       # Start listening
       sock.listen()
-      
+
       # Run until interrupt
       while True:
         # Block execution and wait for a connection from addr = (host, port)
@@ -132,6 +133,7 @@ class HttpServer:
         httpThread = threading.Thread(target=self.handleHTTP, args=(connection,))
         # Start the new thread and continue execution to handle the next connection
         httpThread.start()
+
 
 if __name__ == "__main__":
   httpServer = HttpServer()

@@ -5,6 +5,7 @@ import socket
 
 CLRF = b"\r\n"
 
+
 class FtpClient:
   # Constructor
   def __init__(self, ftpAddr: str = "127.0.0.1", ftpPort: int = 21):
@@ -38,10 +39,14 @@ class FtpClient:
     fullCommand = bytes(command, "utf-8") + CLRF
     # Sends command
     self.controlSock.send(fullCommand)
-    # Reads response and checks that it is what's expected 
+    # Reads response and checks that it is what's expected
     serverResponse = self.controlSock.recv(1024)
     if int(serverResponse[:3]) != expectedResponse:
-      raise Exception("Expected code " + str(expectedResponse) + ", got " + serverResponse.decode("utf-8"))
+      raise Exception(
+          "Expected code " +
+          str(expectedResponse) +
+          ", got " +
+          serverResponse.decode("utf-8"))
     # Return response so information may be used
     return serverResponse
 
