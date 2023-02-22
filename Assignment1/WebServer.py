@@ -50,9 +50,9 @@ def processResponse(fileName: str) -> bytes:
 
   # Check that file exists
   validFile = os.path.isfile(fileName)
-  try:
-    # If not try and get from FTP
-    if not validFile:
+  # If not try and get from FTP
+  if not validFile:
+    try:
       ftpClient = FtpClient()
       # Connect w username and password
       ftpClient.connect(USERNAME, PASSWORD)
@@ -62,8 +62,8 @@ def processResponse(fileName: str) -> bytes:
       ftpClient.disconnect()
       # Check for file again
       validFile = os.path.isfile(fileName)
-  except Exception as e:
-    print(e)
+    except Exception as e:
+      print(e)
 
   # Open file if we have it
   if validFile:
