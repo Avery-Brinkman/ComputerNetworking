@@ -20,8 +20,6 @@ class FtpClient:
     self.sendCommand("USER " + username, 331)
     self.sendCommand("PASS " + password, 230)
 
-    self.disconnect()
-
   def disconnect(self):
     self.sendCommand("QUIT", 221)
     self.controlSock.close()
@@ -31,6 +29,19 @@ class FtpClient:
     self.controlSock.send(fullCommand) 
     serverResponse = self.controlSock.recv(1024)
     assert int(serverResponse[:3]) == expectedResponse
+    return serverResponse
+
+  def getDataPort(self, response: str):
+    addrPort = response[response.find("(") + 1:response.rfind(")")].split(",")
+    portVals = addrPort[-2:]
+    return portVals[0] * 256 + portVals[1]
+
+  def getFile(self, fileName: str):
+    self.sendCommand("CWD /", 250)
+    response = str(self.sendCommand("PASV", 227))
+    dataPort = self.getDataPort(response)
 
 a = FtpClient()
 a.connect("abrinkman", "admin123")
+a.getFile("adfs.txt")
+a.disconnect()
