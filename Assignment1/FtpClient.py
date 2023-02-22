@@ -48,7 +48,7 @@ class FtpClient:
     addrPort = response[response.find("(") + 1:response.rfind(")")].split(",")
     portVals = addrPort[-2:]
     # Calculate port value
-    return portVals[0] * 256 + portVals[1]
+    return int(portVals[0]) * 256 + int(portVals[1])
 
   # Gets the file from a FTP server
   def getFile(self, fileName: str):
@@ -59,7 +59,19 @@ class FtpClient:
     # Get the data port to use
     dataPort = self.getDataPort(response)
 
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as dataSocket:
+      dataSocket.connect((self.ftpAddr, dataPort))
+      responseLine = self.sendCommand("RETR " + fileName, 150).decode("utf-8")
+      self.controlSock.recv(1024)
+      endOfFirstLine = responseLine.find("bytes).\r\n")
+      startOfBytes = responseLine.rfind("(", 0, endOfFirstLine) + 1
+      fileSize = int(responseLine[startOfBytes:endOfFirstLine])
+      fileBytes = dataSocket.recv(fileSize)
+      with open(fileName[1:], 'w+b') as localFile:
+        localFile.write(fileBytes)
+
+
 a = FtpClient()
 a.connect("abrinkman", "admin123")
-a.getFile("adfs.txt")
+a.getFile("/missing_file.txt")
 a.disconnect()
