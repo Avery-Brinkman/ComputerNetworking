@@ -7,9 +7,15 @@ import socket
 import threading
 from FtpClient import FtpClient
 
-HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
-PORT = 6789
 CLRF = "\r\n"
+
+# FTP username and password
+USERNAME = "abrinkman"
+PASSWORD = "admin123"
+
+# localhost and default port constants
+HOST = "127.0.0.1" 
+PORT = 6789
 
 
 # Takes HTML request text and returns the requested file name
@@ -41,14 +47,19 @@ def processResponse(fileName: str) -> bytes:
 
   # Check that file exists
   validFile = os.path.isfile(fileName)
+  # If not try and get from FTP
   if not validFile:
     ftpClient = FtpClient()
-    ftpClient.connect("abrinkman", "admin123")
+    # Connect w username and password
+    ftpClient.connect(USERNAME, PASSWORD)
+    # Get the file
     ftpClient.getFile(fileName)
+    # Close the connection
     ftpClient.disconnect()
+    # Check for file again
     validFile = os.path.isfile(fileName)
 
-  # Open it if it does
+  # Open file if we have it
   if validFile:
     with open(fileName, "rb") as file:
       statusLine += "200 OK" + CLRF
