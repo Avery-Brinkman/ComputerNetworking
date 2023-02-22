@@ -76,14 +76,7 @@ class FtpClient:
       fileSize = int(responseLine[startOfBytes:endOfFirstLine])
       # Get that number of bytes
       fileBytes = dataSocket.recv(fileSize)
-
       # Open a writeable bytes file with same name locally (create if doesn't exist)
-      with open(fileName[1:], 'w+b') as localFile:
+      with open(fileName[fileName.rfind("/") + 1:], 'w+b') as localFile:
         # Write to file
         localFile.write(fileBytes)
-
-
-a = FtpClient()
-a.connect("abrinkman", "admin123")
-a.getFile("/missing_file.txt")
-a.disconnect()
