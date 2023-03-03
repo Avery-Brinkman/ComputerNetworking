@@ -52,8 +52,12 @@ class HttpServer:
 
     # Check that file exists
     validFile = os.path.isfile(fileName)
-    # If not try and get from FTP
-    if not validFile:
+
+    # Get mime type
+    mimeType = mimetypes.guess_type(fileName)[0]
+
+    # If text file doesn't exist locally, try and get from FTP
+    if not validFile and mimeType == "text/plain":
       try:
         ftpClient = FtpClient()
         # Connect w username and password
@@ -72,11 +76,7 @@ class HttpServer:
       with open(fileName, "rb") as file:
         statusLine += "200 OK" + CLRF
         # Set the content type
-        type = mimetypes.guess_type(file.name)[0]
-        if type:
-          contentType += type + CLRF
-        else:
-          contentType += "application/octet-stream" + CLRF
+        contentType += (mimeType or "application/octet-stream") + CLRF
         # Get bytes from file
         body = file.read()
     else:
